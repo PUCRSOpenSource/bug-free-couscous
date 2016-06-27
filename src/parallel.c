@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <mpi.h>
 
-#define ROWS 1000
-#define COLUMNS 100000
+#define ROWS 40
+#define COLUMNS 10
 #define WORKTAG 1
 #define DIETAG 2
 
@@ -40,35 +40,50 @@ master (void)
         }
     }
 
+  printf("Starting seeding the slaves\n");
+
   //Seed the slaves
   for (rank = 1; rank < proc_n; rank++)
     {
-      MPI_Send(vet[work], COLUMNS, MPI_INT, rank, WORKTAG, MPI_COMM_WORLD);
-      work++;
+      printf("Sending to rank %d\n", rank);
+      MPI_Send(vet[work], COLUMNS * ROWS / (proc_n - 1), MPI_INT, rank, WORKTAG, MPI_COMM_WORLD);
+      printf("Sent to rank %d\n", rank);
+      work += ROWS / (proc_n - 1);
+      printf("work is %d\n", work);
     }
+
+  printf("Finished seeding the slaves\n");
 
   //Receive a result from any slave and dispatch a new work request
   int save_path = 0;
-  while (work < ROWS)
+  i = 1;
+  while (i < proc_n)
     {
-      MPI_Recv(vet[save_path], COLUMNS, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-      MPI_Send(vet[work], COLUMNS, MPI_INT, status.MPI_SOURCE, WORKTAG, MPI_COMM_WORLD);
-      work++;
-      save_path++;
+      /*MPI_Recv(vet[save_path], COLUMNS, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);*/
+      MPI_Recv(vet[save_path], COLUMNS * ROWS / (proc_n - 1), MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+      /*MPI_Send(vet[work], COLUMNS, MPI_INT, status.MPI_SOURCE, WORKTAG, MPI_COMM_WORLD);*/
+      printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHHHHHHHHHHHH\n");
+      MPI_Send(0, 0, MPI_INT, status.MPI_SOURCE, DIETAG, MPI_COMM_WORLD);
+      printf("OOOOOOOOOOOOOOOOOOOOOOOOOOOOOOHHHHHHHHHHHH\n");
+      /*work++;*/
+      save_path = ROWS / (proc_n - 1);
+      /*save_path++;*/
+      i++;
+      /*printf("Acabei de mandar o processo %d se matar", status.MPI_SOURCE);*/
     }
 
   //Receive last results
-  for (rank = 1; rank < proc_n; rank++)
-    {
-      MPI_Recv(vet[save_path], COLUMNS, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-      save_path++;
-    }
+  /*for (rank = 1; rank < proc_n; rank++)*/
+    /*{*/
+      /*MPI_Recv(vet[save_path], COLUMNS, MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);*/
+      /*save_path++;*/
+    /*}*/
 
   //Kill all the slaves
-  for (rank = 1; rank < proc_n; rank++)
-    {
-      MPI_Send(0, 0, MPI_INT, rank, DIETAG, MPI_COMM_WORLD);
-    }
+  /*for (rank = 1; rank < proc_n; rank++)*/
+    /*{*/
+      /*MPI_Send(0, 0, MPI_INT, rank, DIETAG, MPI_COMM_WORLD);*/
+    /*}*/
 
   t2 = MPI_Wtime();
   fprintf(stderr, "Time: %fs\n\n", t2-t1);
@@ -79,23 +94,38 @@ master (void)
 int
 slave (void)
 {
-  int* work = malloc(COLUMNS * sizeof(int));
+  int proc_n;
+
   MPI_Status status;
+  MPI_Comm_size(MPI_COMM_WORLD, &proc_n);
+
+  int* work = malloc((COLUMNS * ROWS / (proc_n - 1)) * sizeof(int));
+  int* beginning = work;
 
   //Receive and work until it dies
   while (1)
     {
-      MPI_Recv(work, COLUMNS, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+      MPI_Recv(beginning, COLUMNS * ROWS / (proc_n - 1), MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
       if (status.MPI_TAG == DIETAG)
         {
+          printf("MEU MESTRE MANDOU EU ME MATAR, SOCORR\n");
           free(work);
           return 0;
         }
 
-      qsort(work, COLUMNS, sizeof(int), compare);
+      int i;
+      for (i = 0; i < ROWS / (proc_n - 1); i++)
+	{
+	  printf("Gonna quicksort it\n");
+	  qsort(work += COLUMNS, COLUMNS, sizeof(int), compare);
+	  /*work += COLUMNS;*/
+	  printf(" and work is gonna be %d\n", work);
+	}
 
-      MPI_Send(work, COLUMNS, MPI_INT, 0, 0, MPI_COMM_WORLD);
+      printf("Begginning is %d work is %d and their difference is %d\n", beginning, work, work - beginning);
+      MPI_Send(beginning, COLUMNS * ROWS / (proc_n - 1), MPI_INT, 0, 0, MPI_COMM_WORLD);
+      printf("ENVIEI PRO MEU MESTRE\n");
     }
 
   return 1;
