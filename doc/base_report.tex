@@ -25,7 +25,7 @@
 	são, no total, dez mil vetores que estão na ordem inversa de valores indo de
 	noventa e nove mil novecentos e noventa e nove na primeira posição até zero
 	na ultima posição.  Para a abordagem paralela do trabalho, utilizou-se uma
-	implementação híbrida utilizando as ferramentas MPI\@ e OpenMP. Para este 
+	implementação híbrida utilizando as ferramentas MPI e OpenMP\@. Para este 
 	trabalho temos um dos processos como mestre, que é responsável por mandar 
 	mensagens com os vetores a serem ordenados pelos nós do cluster e reorganizar
 	os vetores nas suas posições originais na estrutura. Os outros processos 
@@ -41,48 +41,19 @@
 	benefícios com as configurações disponíveis. Os tempos de execução utilizando
 	a implementação hibrida não obteve muito sucesso quanto ao tempo de resposta
 	e seus tempos com duas ou mais threads se manteve muito proxima degradando a
-	eficiência.~\ref{result_table}.
-
-	\begin{table}[H]
-		\centering
-		\scalebox{0.8}{
-			\begin{tabular}{c|r|r|r|r}
-				Núcleos & Tempo de Execução(s) & Speed-Up & Speed-Up Ideal & Eficiência \\
-				\hline
-				1 & 6,59000 & 1,00 & 1 & 1,00 \\
-				\hline
-				2 & 10,31665 & 0,63877 & 2 & 0,31939 \\
-				\hline
-				4 & 3,77560 & 1,74542 & 4 & 0,43635 \\
-				\hline
-				5 & 2,51584 & 2,61941 & 5 & 0,52388 \\
-				\hline
-				8 & 2,63324 & 2,50262 & 8 & 0,31283 \\
-				\hline
-				11 & 2,26792 & 2,90575 & 11 & 0,26416 \\
-				\hline
-				12 & 2,31676 & 2,84449 & 12 & 0,23704 \\
-				\hline
-				16 & 2,38038 & 2,76846 & 16 & 0,17303 \\
-				\hline
-				20 & 2,70099 & 2,43985 & 20 & 0,12199 \\
-				\hline
-				24 & 2,58161 & 2,55267 & 24 & 0,10636 \\
-				\hline
-				28 & 2,53986 & 2,59463 & 28 & 0,09267 \\
-				\hline
-				32 & 2,69780 & 2,44273 & 32 & 0,07634 \\
-			\end{tabular}
-		}
-		\caption{Resultados obtidos}
-		\label{result_table}
-	\end{table}
+	eficiência.~\ref{fig_table}.
 
 	\begin{figure}[H]
 		\centering
-		\includegraphics[width=88mm]{doc/graph.png}
-		\caption{Gráfico gerado a partir da tabela}
+		\includegraphics[width=88mm]{table.png}
 		\label{fig_graph}
+	\end{figure}
+
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=88mm]{graph.png}
+		\caption{Gráfico gerado a partir da tabela}
+		\label{fig_table}
 	\end{figure}
 
 	A diferença entre a troca de mensagens pequenas para mensagens maiores 
