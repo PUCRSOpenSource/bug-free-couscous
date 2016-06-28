@@ -10,7 +10,7 @@
 
 \sloppy
 
-\title{Programação Paralela\\ Trabalho I}
+\title{Programação Paralela\\ Trabalho III}
 
 \author{Giovanni Cupertino, Matthias Nunes, \IEEEmembership{Usuário pp12820}}
 
@@ -22,20 +22,19 @@
 
 	O objetivo do trabalho é desenvolver uma solução que ordene diversos vetores
 	utilizando o algoritmo Quick Sort.  Os vetores contém cem mil elementos e
-	são, no total, mil vetores que estão na ordem inversa de valores indo de
+	são, no total, dez mil vetores que estão na ordem inversa de valores indo de
 	noventa e nove mil novecentos e noventa e nove na primeira posição até zero
-	na ultima posição.  Para a abordagem paralela do trabalho, utilizou-se a
-	estrutura mestre escravo utilizando biblioteca MPI\@. Para esta abordagem
-	temos um dos processos como mestre, que é responsável por mandar mensagens
-	com o vetor a ser ordenado, avisar aos escravos para que terminem suas
-	funções (suicídio) e para reorganizar o vetor na sua posição original na
-	estrutura. Os outros processos (escravos) recebem o vetor, o ordenam e
-	devolvem ao mestre e, enquanto estão ativos, ficam pedindo um vetor para
-	ordenar.
+	na ultima posição.  Para a abordagem paralela do trabalho, utilizou-se uma
+	implementação híbrida utilizando as ferramentas MPI\@ e OpenMP. Para esta 
+	abordagem temos um dos processos como mestre, que é responsável por mandar 
+	mensagens com os vetores a serem ordenados pelos nós do cluster e reorganizar
+	os vetores nas suas posições originais na estrutura. Os outros processos 
+	(escravos) recebem os vetores, os ordenam e devolvem ao mestre utilizando o 
+	OpenMP para a exploração do paralelismo com memória compartilhada dentro do nó.
 
 \section{Análise dos Resultados Obtidos}
 
-	Em primeira análise é possível observar que o tempo de resposta para dois
+	É possível observar que o tempo de resposta para dois
 	processos é maior que quando executado sequencialmente, isso ocorre pelo
 	fato de que só temos um processo realizando a ordenação e o outro como
 	mestre, havendo um tempo extra principalmente pela troca de mensagens entre
