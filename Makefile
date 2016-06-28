@@ -12,19 +12,19 @@ LADR = ladrun
 LADFLAGS = -env mpicc
 CFLAGS = -Wall -g -fopenmp
 
-all: sequential parallel
+all: sequential par
 
 sequential: $(SDIR)/sequential.c
 	$(CC) -o $@ $< $(CFLAGS)
 
-parallel: $(SDIR)/parallel.c
+par: $(SDIR)/parallel.c
 ifndef ENVLAD
 	$(MPI) -o $@ $< $(CFLAGS)
 else
 	$(LADC) $(LADFLAGS) $< -o $@ $(CFLAGS)
 endif
 
-run: parallel
+run: par
 ifndef RUNLAD
 ifndef NP
 	$(MPIR) $<
@@ -49,7 +49,7 @@ run_seq: sequential
 
 clean:
 	rm -f sequential
-	rm -f parallel
+	rm -f par
 	rm -f report.aux
 	rm -f report.fdb_latexmk
 	rm -f report.fls

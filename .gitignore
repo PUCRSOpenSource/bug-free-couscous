@@ -34,7 +34,7 @@
 
 
 sequential
-parallel
+par
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
