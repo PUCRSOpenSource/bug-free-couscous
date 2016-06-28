@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
+#include <omp.h>
 
 /*#define DEBUG 1*/
 /*#define BUBBLE 1*/
+#define THREADS 16
 
 #define ROWS 10000
 #define COLUMNS 100000
@@ -124,6 +126,7 @@ slave (void)
         }
 
       int i;
+      omp_set_num_threads(THREADS);
 #pragma omp parallel for
       for (i = 0; i < CHUNK; i++)
         {
