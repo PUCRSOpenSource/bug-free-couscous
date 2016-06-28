@@ -6,6 +6,7 @@
 #define COLUMNS 100000
 #define WORKTAG 1
 #define DIETAG 2
+#define CHUNK 8
 
 int vet[ROWS][COLUMNS];
 
@@ -23,7 +24,6 @@ master (void)
 
   int proc_n;
   int rank;
-  int work = 0;
 
   MPI_Status status;
   MPI_Comm_size(MPI_COMM_WORLD, &proc_n);
@@ -41,23 +41,27 @@ master (void)
     }
 
   //Seed the slaves
-  for (rank = 1; rank < proc_n; rank++)
+  int sent = 0;
+  int received = 0;
+  while( sent < ROWS )
     {
-      MPI_Send(vet[work], COLUMNS * (ROWS / (proc_n - 1)), MPI_INT, rank, WORKTAG, MPI_COMM_WORLD);
-      work += ROWS / (proc_n - 1);
+      for (rank = 1; rank < proc_n && sent < ROWS; rank++)
+        {
+          MPI_Send(vet[sent], CHUNK * COLUMNS, MPI_INT, rank, WORKTAG, MPI_COMM_WORLD);
+          sent += CHUNK;
+        }
+      for (rank = 1; rank < proc_n && received < ROWS; rank++)
+        {
+          MPI_Recv(vet[received], CHUNK * COLUMNS, MPI_INT, rank, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+          received += CHUNK;
+        }
     }
 
-  //Receive a result from any slave and dispatch a new work request
-  int save_path = 0;
+  //Kill the slaves
   i = 1;
   while (i < proc_n)
     {
-      /*MPI_Recv(vet[save_path], COLUMNS * (ROWS / (proc_n - 1)), MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);*/
-      /*MPI_Send(0, 0, MPI_INT, status.MPI_SOURCE, DIETAG, MPI_COMM_WORLD);*/
-      MPI_Recv(vet[save_path], COLUMNS * (ROWS / (proc_n - 1)), MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-      MPI_Send(0, 0, MPI_INT, i, DIETAG, MPI_COMM_WORLD);
-      save_path += ROWS / (proc_n - 1);
-      i++;
+      MPI_Send(0, 0, MPI_INT, i++, DIETAG, MPI_COMM_WORLD);
     }
 
 
@@ -71,33 +75,33 @@ int
 slave (void)
 {
   int proc_n;
+  int my_rank;
 
   MPI_Status status;
   MPI_Comm_size(MPI_COMM_WORLD, &proc_n);
+  MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
 
-  /*int** work = malloc((COLUMNS * ROWS / (proc_n - 1)) * sizeof(int));*/
-  int work[ROWS / (proc_n - 1)][COLUMNS];
+  int work[CHUNK][COLUMNS];
 
   //Receive and work until it dies
   while (1)
     {
-      MPI_Recv(work, COLUMNS * (ROWS / (proc_n - 1)), MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+      MPI_Recv(work, CHUNK * COLUMNS, MPI_INT, 0, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
 
       if (status.MPI_TAG == DIETAG)
         {
           return 0;
         }
 
-
       int i;
 #pragma omp parallel for
-      for (i = 0; i < ROWS / (proc_n - 1); i++)
+      for (i = 0; i < CHUNK; i++)
         {
           qsort(work[i], COLUMNS, sizeof(int), compare);
         }
 #pragma omp barrier
 
-      MPI_Send(work, COLUMNS * (ROWS / (proc_n - 1)), MPI_INT, 0, 0, MPI_COMM_WORLD);
+      MPI_Send(work, CHUNK * COLUMNS, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
 
   return 1;
