@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <mpi.h>
 
-#define ROWS 40
-#define COLUMNS 10
+#define ROWS 10000
+#define COLUMNS 100000
 #define WORKTAG 1
 #define DIETAG 2
 
@@ -52,8 +52,10 @@ master (void)
   i = 1;
   while (i < proc_n)
     {
-      MPI_Recv(vet[save_path], COLUMNS * (ROWS / (proc_n - 1)), MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
-      MPI_Send(0, 0, MPI_INT, status.MPI_SOURCE, DIETAG, MPI_COMM_WORLD);
+      /*MPI_Recv(vet[save_path], COLUMNS * (ROWS / (proc_n - 1)), MPI_INT, MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &status);*/
+      /*MPI_Send(0, 0, MPI_INT, status.MPI_SOURCE, DIETAG, MPI_COMM_WORLD);*/
+      MPI_Recv(vet[save_path], COLUMNS * (ROWS / (proc_n - 1)), MPI_INT, i, MPI_ANY_TAG, MPI_COMM_WORLD, &status);
+      MPI_Send(0, 0, MPI_INT, i, DIETAG, MPI_COMM_WORLD);
       save_path += ROWS / (proc_n - 1);
       i++;
     }
