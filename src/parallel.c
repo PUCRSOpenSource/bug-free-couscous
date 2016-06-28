@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <mpi.h>
 
+/*#define DEBUG 1*/
+/*#define BUBBLE 1*/
+
 #define ROWS 10000
 #define COLUMNS 100000
 #define WORKTAG 1
@@ -9,6 +12,33 @@
 #define CHUNK 8
 
 int vet[ROWS][COLUMNS];
+
+void
+bs (int n, int * vetor)
+{
+  int c =0, d, troca, trocou =1;
+
+  while ((c < (n-1)) & trocou )
+    {
+      trocou = 0;
+      for (d = 0 ; d < n - c - 1; d++)
+        if (vetor[d] > vetor[d+1])
+          {
+            troca      = vetor[d];
+            vetor[d]   = vetor[d+1];
+            vetor[d+1] = troca;
+            trocou = 1;
+          }
+      c++;
+    }
+
+#ifdef DEBUG
+  for ( c = 0 ; c < n ; c++ )
+    printf("%03d ", vetor[c]);
+  printf("\n");
+#endif
+}
+
 
 int
 compare (const void* a, const void* b)
@@ -43,7 +73,7 @@ master (void)
   //Seed the slaves
   int sent = 0;
   int received = 0;
-  while( sent < ROWS )
+  while ( sent < ROWS )
     {
       for (rank = 1; rank < proc_n && sent < ROWS; rank++)
         {
@@ -97,7 +127,11 @@ slave (void)
 #pragma omp parallel for
       for (i = 0; i < CHUNK; i++)
         {
+#ifdef BUBBLE
+          bs(COLUMNS, work[i]);
+#else
           qsort(work[i], COLUMNS, sizeof(int), compare);
+#endif
         }
 #pragma omp barrier
 
