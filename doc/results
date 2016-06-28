@@ -1,0 +1,21 @@
+QS T1
+ladrun -np 5 par
+Time: 37.968629s
+
+QS T2
+ladrun -np 5 par
+Time: 31.269688s
+
+QS T4
+ladrun -np 5 par
+Time: 31.071716s
+
+QS T8
+ladrun -np 5 par
+Time: 30.996441s
+
+QS T16
+ladrun -np 5 par
+Time: 31.068571s
+
+
