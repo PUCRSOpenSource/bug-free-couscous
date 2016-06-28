@@ -136,7 +136,6 @@ slave (void)
           qsort(work[i], COLUMNS, sizeof(int), compare);
 #endif
         }
-#pragma omp barrier
 
       MPI_Send(work, CHUNK * COLUMNS, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
